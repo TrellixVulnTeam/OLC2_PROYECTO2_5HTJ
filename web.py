@@ -1,23 +1,22 @@
+from pyparsing import line
 import streamlit as st
 import pickle
 import pandas as pd
 import os
+import matplotlib.pyplot as plt
+from sklearn import linear_model
+import numpy as np
+from PIL import Image
+regr_Linear = linear_model.LinearRegression()
 
+df = ''
 data = ''
-x = ''
-y = ''
+cox = ''
+coy = ''
 
-with open('lin_reg.pkl', 'rb') as li:
-    lin_reg = pickle.load(li)
-
-with open('log_reg.pkl', 'rb') as lo:
-    log_reg = pickle.load(lo)
-
-with open('svc_m.pkl', 'rb') as sv:
-    svm_mo = pickle.load(sv)
 
 def main():
-    global data, x, y
+    global df, data, x, y, cox, coy
     st.title('Modelamiento de Datos por @Brayan Prado')
     st.sidebar.header('entrada Parametros de Usuario')
 
@@ -30,19 +29,43 @@ def main():
     data = st.file_uploader("Seleccione el Archivo", type=["csv", "xls", "xlsx", "json"])
     if data is not None:
         spli = os.path.splitext(data.name)
-        st.write(spli[1])
         if spli[1] == '.csv':
-            st.write(spli[0])
             df = pd.read_csv(data)
+            st.dataframe(df)
+            x  = df.head()
+            y  = df.head()
+            cox = st.selectbox('seleccione X: ', x.columns)
+            coy = st.selectbox('seleccione Y: ', y.columns) 
+            if st.sidebar.button('Realizar accion'):
+                if ((model == 'Regresion Lineal') or (model == 'Regresion Polinomial')) and (ne == 'Graficar puntos'):
+                    fil = df[cox].tolist()
+                    col = df[coy].tolist()
+                    plt.scatter(fil, col)
+                    plt.ylabel(coy)
+                    plt.xlabel(cox)
+                    plt.savefig('Dispersion.png')
+                    plt.close()
+                    image = Image.open('Dispersion.png')
+                    st.image(image, caption="Grafica de Dispersion")
+                    #st.pyplot('Dispersion.png')
         elif spli[1] == '.xls':
-            st.write(spli[0])
             df = pd.read_excel(data)
+            x  = df.head()
+            y  = df.head()
+            cox = st.selectbox('seleccione X: ', x)
+            coy = st.selectbox('seleccione Y: ', y)
         elif spli[1] == '.xlsx':
-            st.write(spli[0])
             df = pd.read_excel(data)
+            x  = df.head()
+            y  = df.head()
+            cox = st.selectbox('seleccione X: ', x)
+            coy = st.selectbox('seleccione Y: ', y)
         elif spli[1] == '.json':
-            st.write(spli[0])
             df = pd.read_json(data) 
+            x  = df.head()
+            y  = df.head()
+            cox = st.selectbox('seleccione X: ', x)
+            coy = st.selectbox('seleccione Y: ', y)
 
     
 
