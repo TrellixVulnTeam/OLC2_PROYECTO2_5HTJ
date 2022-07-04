@@ -7,7 +7,7 @@ from sklearn.preprocessing import PolynomialFeatures
 import numpy as np
 from PIL import Image
 regr_Linear = linear_model.LinearRegression()
-
+regr_poly = linear_model.LinearRegression()
 
 df = ''
 data = ''
@@ -98,23 +98,23 @@ def main():
                             cy = df[coy]
                             polgra = PolynomialFeatures(degree= int(nivel))
                             x_t = polgra.fit_transform(cx)
-                            regr_Linear.fit(x_t, cy)
+                            regr_poly.fit(x_t, cy)
+                            y_pred = regr_poly.predict(x_t)
                             st.write('Valor de los Coeficientes :')
-                            coer = regr_Linear.coef_
+                            coer = regr_poly.coef_
                             st.write(coer)
                             st.write('Valor del Intercepto :')
-                            st.write(regr_Linear.intercept_)
+                            st.write(regr_poly.intercept_)
                             st.write('Coeficiente de Correlacion :')
-                            y_pred = regr_Linear.predict(x_t)
-                            st.write(regr_Linear.score(x_t, cy))
+                            st.write(regr_poly.score(x_t, cy))
                             st.write('Funcion de Tendencia Central :')
                             concatenacion = ""
                             da = len(coer) - 1
                             while da>=0:
                                 if da != 0:
-                                    concatenacion = concatenacion + str(round(coer[da], 0)) + 'X^' + str(da) + '+'
+                                    concatenacion = concatenacion + str(coer[da]) + 'X^' + str(da) + '+'
                                 else:
-                                    concatenacion = concatenacion + str(round(coer[da], 0))
+                                    concatenacion = concatenacion + str(coer[da])
                                 da = da - 1
                             st.write(concatenacion)
                 elif ((model == 'Regresion Lineal') or (model == 'Regresion Polinomial')) and (ne == 'Realizar predicción de la tendencia'):
@@ -128,7 +128,22 @@ def main():
                         y_p = b1[0]*pred1+b0
                         st.write('El valor que se predijo es :')
                         st.write(y_p)
-                    
+                    elif (model == 'Regresion Polinomial'):
+                        if nivel is not None:
+                            cx = np.asarray(df[cox]).reshape(-1, 1)
+                            cy = df[coy]
+                            polgra = PolynomialFeatures(degree= int(nivel))
+                            x_t = polgra.fit_transform(cx)
+                            regr_poly.fit(x_t, cy)
+                            y_pred = regr_poly.predict(x_t)
+                            concatenar = 0
+                            coer = regr_poly.coef_
+                            da = len(regr_poly.coef_)-1
+                            while da>=0:
+                                concatenar = concatenar + round((coer[da]),0)*int(pred)**(int(da))
+                                da = da -1
+                            st.write(concatenar)
+
         elif spli[1] == '.xls':
             df = pd.read_excel(data)
             x  = df.head()
@@ -147,7 +162,6 @@ def main():
             y  = df.head()
             cox = st.selectbox('seleccione X: ', x)
             coy = st.selectbox('seleccione Y: ', y)
-
     
 
 if __name__== '__main__':
