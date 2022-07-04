@@ -23,7 +23,7 @@ def main():
     Algoritmo = ['Regresion Lineal', 'Regresion Polinomial', 'Clasificador Gaussiano', 'Arboles de Desicion', 'Redes Neuronales']
     model = st.sidebar.selectbox('Seleccione el tipo de Algoritmo', Algoritmo)
 
-    Operaciones = ['Graficar puntos', 'Definir función de tendencia', 'Realizar predicción de la tendencia', 'Clasificar por Gauss o árboles de decisión o redes neuronales']
+    Operaciones = ['Graficar puntos', 'Definir función de tendencia', 'Realizar predicción de la tendencia', 'Clasificar por Gauss', 'árboles de decisión', 'redes neuronales']
     ne = st.sidebar.selectbox('Seleccione la Operacion a Realizar', Operaciones)
 
     nivel = st.sidebar.text_input('Ingrese en grado del polinomio')
