@@ -142,7 +142,7 @@ def main():
                             while da>=0:
                                 concatenar = concatenar + round((coer[da]),0)*int(pred)**(int(da))
                                 da = da -1
-                            st.write('La prediccion es de :')
+                            st.write('La prediccion es de : ')
                             st.write(concatenar)
         elif spli[1] == '.xls':
             df = pd.read_excel(data)
