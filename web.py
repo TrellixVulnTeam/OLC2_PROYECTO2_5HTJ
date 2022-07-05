@@ -163,24 +163,263 @@ def main():
                         st.write(data)
                         st.write('Con una precision de :')
                         st.write(r)
-        elif spli[1] == '.xls':
+        elif (spli[1] == '.xlsx') or (spli[1] == '.xls'):
             df = pd.read_excel(data)
+            st.dataframe(df)
             x  = df.head()
             y  = df.head()
-            cox = st.selectbox('seleccione X: ', x)
-            coy = st.selectbox('seleccione Y: ', y)
-        elif spli[1] == '.xlsx':
-            df = pd.read_excel(data)
-            x  = df.head()
-            y  = df.head()
-            cox = st.selectbox('seleccione X: ', x)
-            coy = st.selectbox('seleccione Y: ', y)
+            #st.write(x.columns)
+            cox = st.selectbox('seleccione X: ', x.columns)
+            coy = st.selectbox('seleccione Y: ', y.columns)
+            if st.sidebar.button('Realizar accion'):
+                if ((model == 'Regresion Lineal') or (model == 'Regresion Polinomial')) and (ne == 'Graficar puntos'):
+                    fil = df[cox].tolist()
+                    col = df[coy].tolist()
+                    plt.scatter(fil, col, color='blue')
+                    plt.ylabel(coy)
+                    plt.xlabel(cox)
+                    if (model == 'Regresion Lineal'):
+                        cx = np.array(df[cox]).reshape(-1,1)
+                        cy = df[coy]
+                        regr_Linear.fit(cx, cy)
+                        b0 = regr_Linear.intercept_
+                        b1 = regr_Linear.coef_
+                        if (b0 < 0):
+                            st.write(str(b1[0]) + 'x ' + str(b0))
+                        elif (b0 > 0):
+                            st.write(str(b1[0]) + 'x + ' + str(b0))
+                        y_p = b1[0]*cx+b0
+                        plt.plot(cx, y_p, color='red')
+                    if (model == 'Regresion Polinomial'):
+                        if nivel is not None: 
+                            cx = np.asarray(df[cox]).reshape(-1, 1)
+                            cy = df[coy]
+                            polgra = PolynomialFeatures(degree= int(nivel))
+                            x_t = polgra.fit_transform(cx)
+                            regr_Linear.fit(x_t, cy)
+                            #plt.plot(x_t, cy)
+                            y_pred = regr_Linear.predict(x_t)
+                            plt.plot(cx, y_pred, color='red')
+                    plt.savefig('Dispersion.png')
+                    plt.close()
+                    image = Image.open('Dispersion.png')
+                    st.image(image, caption="Grafica de Dispersion")
+                elif ((model == 'Regresion Lineal') or (model == 'Regresion Polinomial')) and (ne == 'Definir función de tendencia'):
+                    if (model == 'Regresion Lineal'):
+                        cx = np.array(df[cox]).reshape(-1,1)
+                        cy = df[coy]
+                        regr_Linear.fit(cx, cy)
+                        R = regr_Linear.score(cx,cy)
+                        st.write('Pendiente : ')
+                        b1 = regr_Linear.coef_
+                        st.write(b1)
+                        st.write('Intercepto : ')
+                        b0 = regr_Linear.intercept_
+                        st.write(b0)
+                        st.write('Funcion de tendencia central')
+                        if (b0 < 0):
+                            st.write(str(b1[0]) + 'x ' + str(b0))
+                        elif (b0 > 0):
+                            st.write(str(b1[0]) + 'x + ' + str(b0))
+                        st.write('Coeficiente de Correlacion')
+                        st.write(R)
+                    elif (model == 'Regresion Polinomial'):
+                        if nivel is not None: 
+                            cx = np.asarray(df[cox]).reshape(-1, 1)
+                            cy = df[coy]
+                            polgra = PolynomialFeatures(degree= int(nivel))
+                            x_t = polgra.fit_transform(cx)
+                            regr_poly.fit(x_t, cy)
+                            y_pred = regr_poly.predict(x_t)
+                            st.write('Valor de los Coeficientes :')
+                            coer = regr_poly.coef_
+                            st.write(coer)
+                            st.write('Valor del Intercepto :')
+                            st.write(regr_poly.intercept_)
+                            st.write('Coeficiente de Correlacion :')
+                            st.write(regr_poly.score(x_t, cy))
+                            st.write('Funcion de Tendencia Central :')
+                            concatenacion = ""
+                            da = len(coer) - 1
+                            while da>=0:
+                                if da != 0:
+                                    concatenacion = concatenacion + str(coer[da]) + 'X^' + str(da) + '+'
+                                else:
+                                    concatenacion = concatenacion + str(coer[da])
+                                da = da - 1
+                            st.write(concatenacion)
+                elif ((model == 'Regresion Lineal') or (model == 'Regresion Polinomial')) and (ne == 'Realizar predicción de la tendencia'):
+                    if (model == 'Regresion Lineal'):
+                        cx = np.array(df[cox]).reshape(-1,1)
+                        cy = df[coy]
+                        pred1 = int(pred)
+                        regr_Linear.fit(cx, cy)
+                        b0 = regr_Linear.intercept_
+                        b1 = regr_Linear.coef_
+                        y_p = b1[0]*pred1+b0
+                        st.write('El valor que se predijo es :')
+                        st.write(y_p)
+                    elif (model == 'Regresion Polinomial'):
+                        if nivel is not None:
+                            cx = np.asarray(df[cox]).reshape(-1, 1)
+                            cy = df[coy]
+                            polgra = PolynomialFeatures(degree= int(nivel))
+                            x_t = polgra.fit_transform(cx)
+                            regr_poly.fit(x_t, cy)
+                            y_pred = regr_poly.predict(x_t)
+                            concatenar = 0
+                            coer = regr_poly.coef_
+                            da = len(regr_poly.coef_)-1
+                            while da>=0:
+                                concatenar = concatenar + round((coer[da]),0)*int(pred)**(int(da))
+                                da = da -1
+                            st.write('La prediccion es de : ')
+                            st.write(concatenar)
+                elif (('Redes Neuronales' == model) and ('redes neuronales' == ne)):
+                    st.write('Predecir')
+                    if pred is not None:
+                        cx = df[cox] 
+                        cy = df[coy]
+                        X = cx[: ,np.newaxis]
+                        r = 0
+                        X_train, X_test, Y_train, Y_test = train_test_split(X, cy)
+                        mlr = MLPRegressor(solver='lbfgs', alpha=1e-3, hidden_layer_sizes=(3,3), random_state=1)
+                        mlr.fit(X_train, Y_train)
+                        r = mlr.score(X_train, Y_train)
+                        dato = np.array(int(pred)).reshape(-1, 1) 
+                        st.write('El valor que se quiere predecir da como resultado :')
+                        data = mlr.predict(dato)
+                        st.write(data)
+                        st.write('Con una precision de :')
+                        st.write(r)
         elif spli[1] == '.json':
-            df = pd.read_json(data) 
+            df = pd.read_json(data)
+            st.dataframe(df) 
             x  = df.head()
             y  = df.head()
-            cox = st.selectbox('seleccione X: ', x)
-            coy = st.selectbox('seleccione Y: ', y)
+            cox = st.selectbox('seleccione X: ', x.columns)
+            coy = st.selectbox('seleccione Y: ', y.columns)
+            if st.sidebar.button('Realizar accion'):
+                if ((model == 'Regresion Lineal') or (model == 'Regresion Polinomial')) and (ne == 'Graficar puntos'):
+                    fil = df[cox].tolist()
+                    col = df[coy].tolist()
+                    plt.scatter(fil, col, color='blue')
+                    plt.ylabel(coy)
+                    plt.xlabel(cox)
+                    if (model == 'Regresion Lineal'):
+                        cx = np.array(df[cox]).reshape(-1,1)
+                        cy = df[coy]
+                        regr_Linear.fit(cx, cy)
+                        b0 = regr_Linear.intercept_
+                        b1 = regr_Linear.coef_
+                        if (b0 < 0):
+                            st.write(str(b1[0]) + 'x ' + str(b0))
+                        elif (b0 > 0):
+                            st.write(str(b1[0]) + 'x + ' + str(b0))
+                        y_p = b1[0]*cx+b0
+                        plt.plot(cx, y_p, color='red')
+                    if (model == 'Regresion Polinomial'):
+                        if nivel is not None: 
+                            cx = np.asarray(df[cox]).reshape(-1, 1)
+                            cy = df[coy]
+                            polgra = PolynomialFeatures(degree= int(nivel))
+                            x_t = polgra.fit_transform(cx)
+                            regr_Linear.fit(x_t, cy)
+                            #plt.plot(x_t, cy)
+                            y_pred = regr_Linear.predict(x_t)
+                            plt.plot(cx, y_pred, color='red')
+                    plt.savefig('Dispersion.png')
+                    plt.close()
+                    image = Image.open('Dispersion.png')
+                    st.image(image, caption="Grafica de Dispersion")
+                elif ((model == 'Regresion Lineal') or (model == 'Regresion Polinomial')) and (ne == 'Definir función de tendencia'):
+                    if (model == 'Regresion Lineal'):
+                        cx = np.array(df[cox]).reshape(-1,1)
+                        cy = df[coy]
+                        regr_Linear.fit(cx, cy)
+                        R = regr_Linear.score(cx,cy)
+                        st.write('Pendiente : ')
+                        b1 = regr_Linear.coef_
+                        st.write(b1)
+                        st.write('Intercepto : ')
+                        b0 = regr_Linear.intercept_
+                        st.write(b0)
+                        st.write('Funcion de tendencia central')
+                        if (b0 < 0):
+                            st.write(str(b1[0]) + 'x ' + str(b0))
+                        elif (b0 > 0):
+                            st.write(str(b1[0]) + 'x + ' + str(b0))
+                        st.write('Coeficiente de Correlacion')
+                        st.write(R)
+                    elif (model == 'Regresion Polinomial'):
+                        if nivel is not None: 
+                            cx = np.asarray(df[cox]).reshape(-1, 1)
+                            cy = df[coy]
+                            polgra = PolynomialFeatures(degree= int(nivel))
+                            x_t = polgra.fit_transform(cx)
+                            regr_poly.fit(x_t, cy)
+                            y_pred = regr_poly.predict(x_t)
+                            st.write('Valor de los Coeficientes :')
+                            coer = regr_poly.coef_
+                            st.write(coer)
+                            st.write('Valor del Intercepto :')
+                            st.write(regr_poly.intercept_)
+                            st.write('Coeficiente de Correlacion :')
+                            st.write(regr_poly.score(x_t, cy))
+                            st.write('Funcion de Tendencia Central :')
+                            concatenacion = ""
+                            da = len(coer) - 1
+                            while da>=0:
+                                if da != 0:
+                                    concatenacion = concatenacion + str(coer[da]) + 'X^' + str(da) + '+'
+                                else:
+                                    concatenacion = concatenacion + str(coer[da])
+                                da = da - 1
+                            st.write(concatenacion)
+                elif ((model == 'Regresion Lineal') or (model == 'Regresion Polinomial')) and (ne == 'Realizar predicción de la tendencia'):
+                    if (model == 'Regresion Lineal'):
+                        cx = np.array(df[cox]).reshape(-1,1)
+                        cy = df[coy]
+                        pred1 = int(pred)
+                        regr_Linear.fit(cx, cy)
+                        b0 = regr_Linear.intercept_
+                        b1 = regr_Linear.coef_
+                        y_p = b1[0]*pred1+b0
+                        st.write('El valor que se predijo es :')
+                        st.write(y_p)
+                    elif (model == 'Regresion Polinomial'):
+                        if nivel is not None:
+                            cx = np.asarray(df[cox]).reshape(-1, 1)
+                            cy = df[coy]
+                            polgra = PolynomialFeatures(degree= int(nivel))
+                            x_t = polgra.fit_transform(cx)
+                            regr_poly.fit(x_t, cy)
+                            y_pred = regr_poly.predict(x_t)
+                            concatenar = 0
+                            coer = regr_poly.coef_
+                            da = len(regr_poly.coef_)-1
+                            while da>=0:
+                                concatenar = concatenar + round((coer[da]),0)*int(pred)**(int(da))
+                                da = da -1
+                            st.write('La prediccion es de : ')
+                            st.write(concatenar)
+                elif (('Redes Neuronales' == model) and ('redes neuronales' == ne)):
+                    st.write('Predecir')
+                    if pred is not None:
+                        cx = df[cox] 
+                        cy = df[coy]
+                        X = cx[: ,np.newaxis]
+                        r = 0
+                        X_train, X_test, Y_train, Y_test = train_test_split(X, cy)
+                        mlr = MLPRegressor(solver='lbfgs', alpha=1e-3, hidden_layer_sizes=(3,3), random_state=1)
+                        mlr.fit(X_train, Y_train)
+                        r = mlr.score(X_train, Y_train)
+                        dato = np.array(int(pred)).reshape(-1, 1) 
+                        st.write('El valor que se quiere predecir da como resultado :')
+                        data = mlr.predict(dato)
+                        st.write(data)
+                        st.write('Con una precision de :')
+                        st.write(r)
     
 
 if __name__== '__main__':
