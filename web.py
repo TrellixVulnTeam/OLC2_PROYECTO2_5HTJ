@@ -1,11 +1,14 @@
+from tkinter import HIDDEN
 import streamlit as st
 import pandas as pd
 import os
 import matplotlib.pyplot as plt
 from sklearn import linear_model
 from sklearn.preprocessing import PolynomialFeatures
+from sklearn.model_selection import train_test_split
 import numpy as np
 from PIL import Image
+from sklearn.neural_network import MLPRegressor
 regr_Linear = linear_model.LinearRegression()
 regr_poly = linear_model.LinearRegression()
 
@@ -144,6 +147,23 @@ def main():
                                 da = da -1
                             st.write('La prediccion es de : ')
                             st.write(concatenar)
+                elif (('Redes Neuronales' == model) and ('redes neuronales' == ne)):
+                    st.write('Predecir')
+                    if pred is not None:
+                        cx = np.asarray(df[cox]).reshape(-1, 1) 
+                        cy = df[coy]
+                        X = cx[: ,np.newaxis]
+                        r = 0
+                        X_train, X_test, Y_train, Y_test = train_test_split(cx, cy)
+                        mlr = MLPRegressor(solver='lbfgs', alpha=1e-3, hidden_layer_sizes=(3,3), random_state=1)
+                        mlr.fit(X_train, Y_train)
+                        r = mlr.score(X_train, Y_train)
+                        dato = np.array(int(pred)).reshape(-1, 1) 
+                        st.write('El valor que se quiere predecir da como resultado :')
+                        data = mlr.predict(dato)
+                        st.write(data)
+                        st.write('Con una precision de :')
+                        st.write(r)
         elif spli[1] == '.xls':
             df = pd.read_excel(data)
             x  = df.head()
