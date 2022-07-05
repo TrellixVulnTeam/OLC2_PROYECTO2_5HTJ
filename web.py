@@ -149,11 +149,11 @@ def main():
                 elif (('Redes Neuronales' == model) and ('redes neuronales' == ne)):
                     st.write('Predecir')
                     if pred is not None:
-                        cx = np.asarray(df[cox]).reshape(-1, 1) 
+                        cx = df[cox] 
                         cy = df[coy]
                         X = cx[: ,np.newaxis]
                         r = 0
-                        X_train, X_test, Y_train, Y_test = train_test_split(cx, cy)
+                        X_train, X_test, Y_train, Y_test = train_test_split(X, cy)
                         mlr = MLPRegressor(solver='lbfgs', alpha=1e-3, hidden_layer_sizes=(3,3), random_state=1)
                         mlr.fit(X_train, Y_train)
                         r = mlr.score(X_train, Y_train)
